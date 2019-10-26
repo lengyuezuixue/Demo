@@ -18,6 +18,8 @@ public:
 
     void sendData(const QByteArray &array);
 
+    bool isConnected();
+
 signals:
     void newImageAvailabled(const QImage &image);
 
@@ -36,9 +38,7 @@ private:
 	int  m_port;
 	QTcpSocket *m_pSocket;
 
-    QByteArray m_pixArray;
-    int m_recvDataSize;
-    int m_dataSize;
+    QByteArray m_buffer; //缓存上一次或多次的未处理的数据, 这个用来处理，重新粘包
 };
 
 #define YOLO_CLIENT	(YoloClient::instance())

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.8.2, 2019-10-22T15:18:47. -->
+<!-- Written by QtCreator 4.8.2, 2019-10-24T22:24:58. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -296,8 +296,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">xes_yolo_client</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:E:/demo/xes_yolo_client/xes_yolo_client.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">xes_yolo_client2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:E:/syk_workspace/Demo/xes_yolo_client/xes_yolo_client.pro</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">xes_yolo_client.pro</value>
     <value type="QString" key="RunConfiguration.Arguments"></value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>

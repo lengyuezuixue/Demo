@@ -6,15 +6,14 @@
 
 #include "YoloClient.h"
 
+#define PACKAGE_HEAD_SIZE  20
+
 YoloClient::YoloClient(QObject *parent)
 	: QObject(parent)
 	, m_port(55920)
-    , m_recvDataSize(0)
-    , m_dataSize(0)
 {
 	m_pSocket = new QTcpSocket();
 
-    m_pixArray.resize(0);
 
     connect(m_pSocket, SIGNAL(connected()), this, SLOT(onConnected()));
     connect(m_pSocket, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
@@ -46,6 +45,11 @@ YoloClient *YoloClient::instance()
 void YoloClient::setPort(int port)
 {
 	m_port = port;
+}
+
+bool YoloClient::isConnected()
+{
+    return m_pSocket->state() == QAbstractSocket::ConnectedState;
 }
 
 void YoloClient::connectServer()
@@ -83,55 +87,51 @@ void YoloClient::onStateChanged(QAbstractSocket::SocketState socketState)
 void YoloClient::onReadyRead()
 {
 	QTcpSocket *obj = dynamic_cast<QTcpSocket*>(sender());
-    if (obj == nullptr) {
+    if (obj == nullptr || obj->bytesAvailable() <= 0) {
 		return;
 	}
 
-   QByteArray msg = obj->readAll();
+    QByteArray buffer = obj->readAll();
+    m_buffer.append(buffer);
 
-   if (m_recvDataSize == 0){
-       QDataStream out(msg);
+    int packageSize = 0;
+    int flag, width, heigth, rgb, size;
 
-       int size;
-       out >> size >> size >> size >> size >> size;
+    int totalLen = m_buffer.size();
+    while (totalLen){
+        if (totalLen < PACKAGE_HEAD_SIZE){ //不够包头的数据直接就不处理
+            break;
+        }
 
-       qDebug() << "size:" << size;
+        QDataStream packet(m_buffer);
+        packet.setByteOrder(QDataStream::LittleEndian);
 
-       m_dataSize = size + 20;
-   }
+        packet >> flag >> width >> heigth >> rgb >> size;
 
-   if (m_recvDataSize != m_dataSize){
+        packageSize = size + PACKAGE_HEAD_SIZE;
 
-       m_recvDataSize += msg.size();
-       m_pixArray.append(msg);
-   }
+        //如果不够长度等够了在来解析
+        if (totalLen < packageSize){
+            break;
+        }
 
+        if (flag == 0){
+            QByteArray pixArray = m_buffer.mid(PACKAGE_HEAD_SIZE, size);
 
-   if (m_recvDataSize == m_dataSize && m_recvDataSize != 0){
-        m_recvDataSize = 0;
-        m_dataSize = 0;
+            QImage img;
+            img.loadFromData(pixArray);
 
-        QDataStream out(m_pixArray);
-        int flag, width, heigth, rgb, size;
-        out >> flag >> width >> heigth >> rgb >> size;
-
-        qDebug() << Q_FUNC_INFO << QString("flag:%1, width:%2, heigth:%3, rgb:%4, size:%5").arg(flag).arg(width).arg(heigth).arg(rgb).arg(size);
-
-
-        QByteArray pixArray = m_pixArray.right(size);
-
-
-        QImage img;
-        img.loadFromData(pixArray);
-
-        if (!img.isNull()){
             emit newImageAvailabled(img);
         }
-        else {
-            qDebug() << "img is NULL";
-        }
 
 
-        m_pixArray.resize(0);
-   }
+        //缓存多余的数据
+        buffer = m_buffer.right(totalLen - packageSize);
+
+        //更新长度
+        totalLen = buffer.size();
+
+        //更新多余数据
+        m_buffer = buffer;
+    }
 }

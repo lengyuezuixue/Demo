@@ -9,6 +9,7 @@ YoloServerManager::YoloServerManager(QObject *parent)
     :QObject (parent)
 {
     m_process = new QProcess(this);
+    m_process->setReadChannel(QProcess::StandardOutput);
 
     connect(m_process, SIGNAL(readyReadStandardOutput()), this, SLOT(onReadyStandarOutput()));
     connect(m_process, SIGNAL(readyReadStandardError()), this, SLOT(onReadyStandarError()));
@@ -94,10 +95,10 @@ void YoloServerManager::onReadyStandarOutput()
     }
 
     QString msg = p->readAllStandardOutput();
-    qDebug() << QString("[ai_yolo] StandarOutput:%1").arg(msg.data());
 
-     QStringList msgList = msg.split("\r\n", QString::SkipEmptyParts);
+    QStringList msgList = msg.split("\r\n", QString::SkipEmptyParts);
      foreach(QString item, msgList){
+         qDebug() << QString("[ai_yolo] StandarOutput:%1").arg(item);
          if (item.startsWith("listen port:")){
             int idx = item.indexOf(":");
             m_listenPort = item.mid(idx+1, item.length() - idx - 1).toInt();
